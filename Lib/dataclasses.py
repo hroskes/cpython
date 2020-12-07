@@ -497,15 +497,15 @@ def _init_fn(fields, frozen, has_post_init, self_name, globals):
     # function source code, but catching it here gives a better error
     # message, and future-proofs us in case we build up the function
     # using ast.
-    seen_default = False
+    seen_default = None
     for f in fields:
         # Only consider fields in the __init__ call.
         if f.init:
             if not (f.default is MISSING and f.default_factory is MISSING):
-                seen_default = True
-            elif seen_default:
-                raise TypeError(f'non-default argument {f.name!r} '
-                                'follows default argument')
+                seen_default = f
+            elif seen_default is not None:
+                raise TypeError(f'non-default argument {f.name!r} follows '
+                                f'default argument {seen_default.name!r}')
 
     locals = {f'_type_{f.name}': f.type for f in fields}
     locals.update({
